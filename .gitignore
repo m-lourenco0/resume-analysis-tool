@@ -1,3 +1,4 @@
 # uv things
 uv.lock
 bin/tailwindcss
+__pycache__/
