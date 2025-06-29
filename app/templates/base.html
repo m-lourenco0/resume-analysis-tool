@@ -5,16 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{% block title %}My HTMX + Alpine.js App{% endblock %}</title>
 
-    <!-- Theme Handler -->
-    <script>
-      document.documentElement.classList.toggle(
-        "dark",
-        localStorage.theme === "dark" ||
-          (!("theme" in localStorage) &&
-            window.matchMedia("(prefers-color-scheme: dark)").matches),
-      );
-    </script>
-
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -65,7 +55,7 @@
     <!-- main content  -->
     <div
       id="main-content"
-      class="h-svh w-full overflow-y-auto p-4 bg-surface dark:bg-surface-dark"
+      class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 transition-colors"
     >
       {% block content %} {% endblock %}
     </div>

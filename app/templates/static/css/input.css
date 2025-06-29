@@ -1,3 +1,28 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@theme {
+  /* Light Theme */
+  --color-surface: var(--color-white);
+  --color-surface-alt: var(--color-slate-100);
+  --color-on-surface: var(--color-slate-700);
+  --color-on-surface-strong: var(--color-black);
+  --color-primary: var(--color-blue-700);
+  --color-on-primary: var(--color-slate-100);
+  --color-secondary: var(--color-indigo-700);
+  --color-on-secondary: var(--color-slate-100);
+  --color-outline: var(--color-slate-300);
+  --color-outline-strong: var(--color-slate-800);
+
+  /* Shared Colors */
+  --color-info: var(--color-sky-600);
+  --color-on-info: var(--color-white);
+  --color-success: var(--color-green-600);
+  --color-on-success: var(--color-white);
+  --color-warning: var(--color-amber-500);
+  --color-on-warning: var(--color-white);
+  --color-danger: var(--color-red-600);
+  --color-on-danger: var(--color-white);
+
+  /* Border Radius */
+  --radius-radius: var(--radius-lg);
+}
