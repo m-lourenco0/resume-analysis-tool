@@ -1,11 +1,15 @@
 # app/main.py
-import os
-from fastapi import FastAPI, Request, Form, UploadFile, File
+from fastapi import FastAPI, HTTPException, Request, Form, UploadFile, File
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from openai import AuthenticationError
+
 
 from pathlib import Path
+
+from app.services.document_parser import parse_document
+from app.services.graph import run_analysis_graph
 
 # --- Configuration ---
 BASE_DIR = Path(__file__).resolve().parent
@@ -74,22 +78,76 @@ async def analyze_resume(
     Receives form data, performs analysis, and re-renders the page
     with the results included.
     """
-    # 1. Parse the resume file
-    resume_text = "example text"
+    try:
+        # 1. Parse the resume file
+        resume_text = await parse_document(resume_file)
 
-    # 2. Get analysis from AI service
-    analysis_result = get_ai_analysis(api_key, job_description, resume_text)
+        # 2. Get analysis from AI service
+        analysis_result = run_analysis_graph(
+            api_key=api_key, job_description=job_description, resume_text=resume_text
+        )
 
-    # 3. Re-render the same template, now with the analysis_result populated
-    return templates.TemplateResponse(
-        "analysis/index.html",
-        {
-            "request": request,
-            "analysis_result": analysis_result,
-            # Pass the original form data back to pre-fill the form
-            "analysis_request": {
-                "job_description": job_description,
-                "api_key": api_key,
+        print("-- ANALYSIS RESULT --")
+        print(analysis_result)
+
+        # 3. Re-render the same template, now with the analysis_result populated
+        return templates.TemplateResponse(
+            "analysis/index.html",
+            {
+                "request": request,
+                "analysis_result": analysis_result,
+                # Pass the original form data back to pre-fill the form
+                "analysis_request": {
+                    "job_description": job_description,
+                    "api_key": api_key,
+                },
             },
-        },
-    )
+        )
+    except AuthenticationError:
+        # Catch the specific error for invalid API keys and provide a user-friendly message.
+        print("Caught AuthenticationError: Invalid API Key.")
+        return templates.TemplateResponse(
+            "analysis/index.html",
+            {
+                "request": request,
+                "analysis_request": {
+                    "job_description": job_description,
+                    "api_key": api_key,
+                },
+                "analysis_result": {
+                    "error": "Authentication failed. The provided OpenAI API key is incorrect or invalid.",
+                },
+            },
+        )
+    except HTTPException as e:
+        # Handle file parsing errors
+        print(f"Caught HTTPException: {e.detail}")
+        return templates.TemplateResponse(
+            "analysis/index.html",
+            {
+                "request": request,
+                "analysis_request": {
+                    "job_description": job_description,
+                    "api_key": api_key,
+                },
+                "analysis_result": {
+                    "error": e.detail,
+                },
+            },
+        )
+    except Exception as e:
+        # Handle other potential errors (e.g., from the graph or other API issues)
+        print(f"Caught generic exception: {e}")
+        return templates.TemplateResponse(
+            "analysis/index.html",
+            {
+                "request": request,
+                "analysis_request": {
+                    "job_description": job_description,
+                    "api_key": api_key,
+                },
+                "analysis_result": {
+                    "error": f"An unexpected error occurred: {str(e)}",
+                },
+            },
+        )
