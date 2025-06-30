@@ -326,243 +326,393 @@
                               Analyze Resume
                             </span>
                         </button>
-                        {% if analysis_result %}<a href="/" class="inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">New Analysis</a>{% endif %}
+                        {% if analysis_result %}
+                        <a href="/" class="inline-flex items-center px-4 py-2 border border-gray-300 text-base font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                          New Analysis
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </form>
 
             {% if analysis_result %}
             <div class="space-y-6">
-                {% if analysis_result.error %}
-                <div class="rounded-md bg-red-50 p-4 shadow"><p class="text-sm font-medium text-red-800">Error: {{ analysis_result.error }}</p></div>
-                {% else %}
-                <div class="bg-white shadow-lg rounded-xl">
-                    <div class="p-6">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-5 w-5 text-green-600"
-                          >
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
-                            <path d="M15.5 16C15.7761 16 16 15.7761 16 15.5C16 15.2239 15.7761 15 15.5 15C15.2239 15 15 15.2239 15 15.5C15 15.7761 15.2239 16 15.5 16Z" fill="currentColor"></path>
-                            <path d="M8.5 9C8.77614 9 9 8.77614 9 8.5C9 8.22386 8.77614 8 8.5 8C8.22386 8 8 8.22386 8 8.5C8 8.77614 8.22386 9 8.5 9Z" fill="currentColor"></path>
-                            <path d="M16 8L8 16"></path>
-                          </svg>
-                          Match Score
-                        </h3>
-                        <p class="text-sm text-gray-500">How well your resume matches the job description</p>
-                    </div>
-                    <div class="p-6 pt-0">
-                        <div class="space-y-4">
-                            <div class="flex items-center justify-between">
-                                <span class="text-2xl font-bold text-gray-800">
-                                  {{ analysis_result.match_score }}%
-                                </span>
-                                {% if analysis_result.match_score >= 80 %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                                  Excellent Match
-                                </span>
-                                {% elif analysis_result.match_score >= 60 %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-                                  Good Match
-                                </span>
-                                {% else %}
-                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800">
-                                  Needs Improvement
-                                </span>
-                                {% endif %}
-                            </div>
-                            <div class="w-full bg-gray-200 rounded-full h-3">
-                              <div class="bg-green-500 h-3 rounded-full" style="width: {{ analysis_result.match_score }}%"></div>
-                            </div>
-                        </div>
-                    </div>
+              {% if analysis_result.error %}
+              <div class="rounded-md bg-red-50 p-4 shadow">
+                <p class="text-sm font-medium text-red-800">
+                  Error: {{ analysis_result.error }}
+                </p>
+              </div>
+              {% else %}
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-green-600"
+                    >
+                      <path
+                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      ></path>
+                      <path
+                        d="M15.5 16C15.7761 16 16 15.7761 16 15.5C16 15.2239 15.7761 15 15.5 15C15.2239 15 15 15.2239 15 15.5C15 15.7761 15.2239 16 15.5 16Z"
+                        fill="currentColor"
+                      ></path>
+                      <path
+                        d="M8.5 9C8.77614 9 9 8.77614 9 8.5C9 8.22386 8.77614 8 8.5 8C8.22386 8 8 8.22386 8 8.5C8 8.77614 8.22386 9 8.5 9Z"
+                        fill="currentColor"
+                      ></path>
+                      <path d="M16 8L8 16"></path>
+                    </svg>
+                    Match Score
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    How well your resume matches the job description
+                  </p>
                 </div>
-
-                <div class="bg-white shadow-lg rounded-xl">
-                  <div class="p-6">
-                    <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        class="h-5 w-5 text-purple-600"
+                <div class="p-6 pt-0">
+                  <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                      <span class="text-2xl font-bold text-gray-800">
+                        {{ analysis_result.match_score | round }}%
+                      </span>
+                      {% if analysis_result.match_score >= 80 %}
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800"
                       >
-                        <path d="M4 21.4V2.6C4 2.26863 4.26863 2 4.6 2H16.2515C16.4106 2 16.5632 2.06321 16.6757 2.17574L19.8243 5.32426C19.9368 5.43679 20 5.5894 20 5.74853V21.4C20 21.7314 19.7314 22 19.4 22H4.6C4.26863 22 4 21.7314 4 21.4Z"></path>
-                        <path d="M8 10L16 10"></path>
-                        <path d="M8 18L16 18"></path>
-                        <path d="M8 14L12 14"></path>
-                        <path d="M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20"></path>
-                      </svg>
-                      Analysis Summary
-                    </h3>
-                    <p class="text-sm text-gray-500 mt-1">A brief overview of how your resume aligns with the job requirements.</p>
+                        Excellent Match
+                      </span>
+                      {% elif analysis_result.match_score >= 60 %}
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800"
+                      >
+                        Good Match
+                      </span>
+                      {% else %}
+                      <span
+                        class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-800"
+                      >
+                        Needs Improvement
+                      </span>
+                      {% endif %}
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        class="h-3 rounded-full {% if analysis_result.match_score >= 80 %}bg-green-500{% elif analysis_result.match_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %}"
+                        style="width: {{ analysis_result.match_score }}%"
+                      ></div>
+                    </div>
                   </div>
-                  <div class="p-6 pt-0">
-                    <p class="text-gray-800 leading-relaxed">
-                      {{ analysis_result.summary }}
+                </div>
+              </div>
+
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-gray-600"
+                    >
+                      <path d="M5 12V4C5 3.44772 5.44772 3 6 3H18C18.5523 3 19 3.44772 19 4V12"></path>
+                      <path d="M5 16V20C5 20.5523 5.44772 21 6 21H18C18.5523 21 19 20.5523 19 20V16"></path>
+                      <path d="M2 12H22"></path>
+                    </svg>
+                    Technical Analysis
+                  </h3>
+                  <p class="text-sm text-gray-500 mt-1">
+                    ATS optimization and structural review for human readability.
+                  </p>
+                </div>
+                <div class="p-6 pt-0 space-y-6">
+                  <div>
+                    <h4 class="text-md font-semibold text-gray-800">
+                      ATS Friendliness Score
+                    </h4>
+                    <div class="space-y-2 mt-2">
+                      <div class="flex items-center justify-between">
+                        <span class="text-xl font-bold text-gray-700">
+                          {{ analysis_result.ats_friendliness_score | round }}%
+                        </span>
+                      </div>
+                      <div class="w-full bg-gray-200 rounded-full h-2.5">
+                        <div
+                          class="h-2.5 rounded-full {% if analysis_result.ats_friendliness_score >= 80 %}bg-green-500{% elif analysis_result.ats_friendliness_score >= 60 %}bg-yellow-500{% else %}bg-red-500{% endif %}"
+                          style="width: {{ analysis_result.ats_friendliness_score }}%"
+                        ></div>
+                      </div>
+                    </div>
+                    <p class="mt-3 text-gray-800 leading-relaxed">
+                      {{ analysis_result.ats_friendliness_feedback }}
+                    </p>
+                  </div>
+
+                  <hr />
+
+                  <div>
+                    <h4 class="text-md font-semibold text-gray-800">
+                      Structure & Readability Feedback
+                    </h4>
+                    <p class="mt-3 text-gray-800 leading-relaxed">
+                      {{ analysis_result.structure_feedback }}
                     </p>
                   </div>
                 </div>
+              </div>
 
-                <div class="bg-white shadow-lg rounded-xl">
-                    <div class="p-6">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-purple-600"
+                    >
+                      <path
+                        d="M4 21.4V2.6C4 2.26863 4.26863 2 4.6 2H16.2515C16.4106 2 16.5632 2.06321 16.6757 2.17574L19.8243 5.32426C19.9368 5.43679 20 5.5894 20 5.74853V21.4C20 21.7314 19.7314 22 19.4 22H4.6C4.26863 22 4 21.7314 4 21.4Z"
+                      ></path>
+                      <path d="M8 10L16 10"></path>
+                      <path d="M8 18L16 18"></path>
+                      <path d="M8 14L12 14"></path>
+                      <path d="M16 2V5.4C16 5.73137 16.2686 6 16.6 6H20"></path>
+                    </svg>
+                    Analysis Summary
+                  </h3>
+                  <p class="text-sm text-gray-500 mt-1">
+                    A brief overview of how your resume aligns with the job requirements.
+                  </p>
+                </div>
+                <div class="p-6 pt-0">
+                  <p class="text-gray-800 leading-relaxed">
+                    {{ analysis_result.summary }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-green-600"
+                    >
+                      <path d="M7 12.5L10 15.5L17 8.5"></path>
+                      <path
+                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      ></path>
+                    </svg>
+                    Compatible Keywords
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    Keywords from the job description that are present in your resume
+                  </p>
+                </div>
+                <div class="p-6 pt-0">
+                  <div class="flex flex-wrap gap-2">
+                    {% for keyword in analysis_result.compatible_keywords %}
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border-green-300 border"
+                      >{{ keyword }}</span
+                    >
+                    {% else %}
+                    <p class="text-sm text-gray-500">
+                      No matching keywords found. Consider adding relevant terms from the
+                      job description.
+                    </p>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-orange-600"
+                    >
+                      <path d="M12 7L12 13"></path>
+                      <path d="M12 17.01L12.01 16.9989"></path>
+                      <path
+                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      ></path>
+                    </svg>
+                    Missing Keywords
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    Important keywords from the job description that are missing from your
+                    resume
+                  </p>
+                </div>
+                <div class="p-6 pt-0">
+                  <div class="flex flex-wrap gap-2">
+                    {% for keyword in analysis_result.missing_keywords %}
+                    <span
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium text-orange-700 border-orange-300 border"
+                      >{{ keyword }}</span
+                    >
+                    {% else %}
+                    <p class="text-sm font-medium text-green-600">
+                      Great! Your resume includes all the key terms from the job
+                      description.
+                    </p>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-5 w-5 text-blue-600"
+                    >
+                      <path d="M9 18H15"></path>
+                      <path d="M10 21H14"></path>
+                      <path
+                        d="M9.00082 15C9.00098 13 8.50098 12.5 7.50082 11.5C6.50067 10.5 6.02422 9.48689 6.00082 8C5.95284 4.95029 8.00067 3 12.0008 3C16.001 3 18.0488 4.95029 18.0008 8C17.9774 9.48689 17.5007 10.5 16.5008 11.5C15.501 12.5 15.001 13 15.0008 15"
+                      ></path>
+                    </svg>
+                    Improvement Suggestions
+                  </h3>
+                  <p class="text-sm text-gray-500">
+                    AI-powered recommendations to enhance your resume
+                  </p>
+                </div>
+                <div class="p-6 pt-0">
+                  <div class="space-y-4">
+                    {% for suggestion in analysis_result.suggestions %}
+                    <div class="flex gap-3">
+                      <div
+                        class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-medium"
+                      >
+                        {{ loop.index }}
+                      </div>
+                      <p class="text-gray-800 leading-relaxed">{{ suggestion }}</p>
+                    </div>
+                    {% endfor %}
+                  </div>
+                </div>
+              </div>
+
+              <div
+                x-data="{ promptText: `{{ analysis_result.prompt | e }}` }"
+                class="rounded-xl border-indigo-200 border bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg"
+              >
+                <div class="p-6">
+                  <h3 class="flex items-center gap-2 text-lg font-semibold text-indigo-900">
+                    <svg
+                      class="h-5 w-5 text-indigo-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                      />
+                    </svg>
+                    AI Resume Editor Prompt
+                  </h3>
+                  <p class="text-sm text-indigo-800/80">
+                    Copy this prompt to use with ChatGPT, Gemini, or other AI tools to
+                    improve your resume
+                  </p>
+                </div>
+                <div class="p-6 pt-0 space-y-4">
+                  <div class="bg-white/70 rounded-lg p-4 border border-indigo-200">
+                    <div class="flex items-center justify-between mb-3">
+                      <span class="text-sm font-medium text-indigo-900">Generated Prompt</span>
+                      <button
+                        @click="navigator.clipboard.writeText(promptText); alert('Prompt copied to clipboard!')"
+                        class="inline-flex items-center gap-2 px-3 py-1.5 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-white/50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      >
+                        <svg
+                          class="h-4 w-4"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            class="h-5 w-5 text-green-600"
-                          >
-                            <path d="M7 12.5L10 15.5L17 8.5"></path>
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
-                          </svg>
-                          Compatible Keywords
-                        </h3>
-                        <p class="text-sm text-gray-500">Keywords from the job description that are present in your resume</p>
-                    </div>
-                    <div class="p-6 pt-0">
-                        <div class="flex flex-wrap gap-2">
-                            {% for keyword in analysis_result.compatible_keywords %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800 border-green-300 border">{{ keyword }}</span>
-                            {% else %}
-                            <p class="text-sm text-gray-500">No matching keywords found. Consider adding relevant terms from the job description.</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="bg-white shadow-lg rounded-xl">
-                    <div class="p-6">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
                             stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-5 w-5 text-orange-600"
-                          >
-                            <path d="M12 7L12 13"></path>
-                            <path d="M12 17.01L12.01 16.9989"></path>
-                            <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
-                          </svg>
-                          Missing Keywords
-                        </h3>
-                        <p class="text-sm text-gray-500">Important keywords from the job description that are missing from your resume</p>
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                          />
+                        </svg>
+                        Copy Prompt
+                      </button>
                     </div>
-                    <div class="p-6 pt-0">
-                        <div class="flex flex-wrap gap-2">
-                            {% for keyword in analysis_result.missing_keywords %}
-                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium text-orange-700 border-orange-300 border">{{ keyword }}</span>
-                            {% else %}
-                            <p class="text-sm font-medium text-green-600">Great! Your resume includes all the key terms from the job description.</p>
-                            {% endfor %}
-                        </div>
+                    <div class="bg-gray-50 rounded-md p-3 max-h-48 overflow-y-auto">
+                      <pre
+                        class="text-xs text-gray-700 whitespace-pre-wrap font-mono"
+                      >{{ analysis_result.prompt }}</pre>
                     </div>
-                </div>
+                  </div>
+                  <div class="flex items-center gap-2 text-sm text-indigo-700">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      class="h-4 w-4"
+                    >
+                      <path d="M12 11.5V16.5"></path>
+                      <path d="M12 7.51L12.01 7.49889"></path>
+                      <path
+                        d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                      ></path>
+                    </svg>
 
-                <div class="bg-white shadow-lg rounded-xl">
-                    <div class="p-6">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-5 w-5 text-blue-600"
-                          >
-                            <path d="M9 18H15"></path>
-                            <path d="M10 21H14"></path>
-                            <path d="M9.00082 15C9.00098 13 8.50098 12.5 7.50082 11.5C6.50067 10.5 6.02422 9.48689 6.00082 8C5.95284 4.95029 8.00067 3 12.0008 3C16.001 3 18.0488 4.95029 18.0008 8C17.9774 9.48689 17.5007 10.5 16.5008 11.5C15.501 12.5 15.001 13 15.0008 15"></path>
-                          </svg>
-                          Improvement Suggestions
-                        </h3>
-                        <p class="text-sm text-gray-500">AI-powered recommendations to enhance your resume</p>
+                    <span>
+                      Paste this prompt into ChatGPT, Gemini, or Claude along with your
+                      current resume text
+                    </span>
                     </div>
-                    <div class="p-6 pt-0">
-                        <div class="space-y-4">
-                            {% for suggestion in analysis_result.suggestions %}
-                            <div class="flex gap-3">
-                              <div class="flex-shrink-0 w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-sm font-medium">
-                                {{ loop.index }}
-                              </div><p class="text-gray-800 leading-relaxed">
-                              {{ suggestion }}
-                              </p>
-                            </div>
-                            {% endfor %}
-                        </div>
-                    </div>
+                  </div>
                 </div>
-                
-                <div x-data="{ promptText: `{{ analysis_result.prompt | e }}` }" class="rounded-xl border-indigo-200 border bg-gradient-to-r from-indigo-50 to-purple-50 shadow-lg">
-                    <div class="p-6">
-                        <h3 class="flex items-center gap-2 text-lg font-semibold text-indigo-900">
-                          <svg class="h-5 w-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                          </svg>
-                          AI Resume Editor Prompt
-                        </h3>
-                        <p class="text-sm text-indigo-800/80">Copy this prompt to use with ChatGPT, Gemini, or other AI tools to improve your resume</p>
-                    </div>
-                    <div class="p-6 pt-0 space-y-4">
-                        <div class="bg-white/70 rounded-lg p-4 border border-indigo-200">
-                            <div class="flex items-center justify-between mb-3">
-                                <span class="text-sm font-medium text-indigo-900">Generated Prompt</span>
-                                <button 
-                                  @click="navigator.clipboard.writeText(promptText); alert('Prompt copied to clipboard!')" 
-                                  class="inline-flex items-center gap-2 px-3 py-1.5 border border-indigo-300 text-sm font-medium rounded-md text-indigo-700 bg-white/50 hover:bg-indigo-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                >
-                                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                                  </svg>
-                                  Copy Prompt
-                                </button>
-                            </div>
-                            <div class="bg-gray-50 rounded-md p-3 max-h-48 overflow-y-auto">
-                                <pre class="text-xs text-gray-700 whitespace-pre-wrap font-mono">{{ analysis_result.prompt }}</pre>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-indigo-700">
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="2"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              class="h-4 w-4"
-                            >
-                              <path d="M12 11.5V16.5"></path>
-                              <path d="M12 7.51L12.01 7.49889"></path>
-                              <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"></path>
-                            </svg>
-
-                            <span>Paste this prompt into ChatGPT, Gemini, or Claude along with your current resume text</span>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
+              </div>
+              {% endif %}
             </div>
             {% endif %}
 
