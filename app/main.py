@@ -26,44 +26,14 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
-def get_ai_analysis(api_key: str, job_description: str, resume_text: str) -> dict:
-    """
-    Placeholder for the actual call to the OpenAI API.
-    Returns a dictionary with analysis results.
-    """
-    print("--- AI ANALYSIS CALLED (SIMULATED) ---")
-    print(f"API Key starts with: {api_key[:6]}")
-    # Simulate an API call and response
-    try:
-        # For this example, we return a mock result.
-        if "fail" in job_description.lower():
-            return {"error": "Simulated AI API failure."}
-
-        # Generate the prompt text on the server
-        prompt = f"Based on the following job description and my resume, please help me improve my resume. Job Description: '{job_description}'. My Resume: '{resume_text}'."
-
-        return {
-            "match_score": 85,
-            "compatible_keywords": ["Python", "FastAPI", "SQL", "Problem Solving"],
-            "missing_keywords": ["Docker", "Kubernetes", "CI/CD"],
-            "suggestions": [
-                "Incorporate the keyword 'Docker' into your project descriptions to better align with the job's DevOps requirements.",
-                "Quantify your achievements in the 'Senior Developer' role. For example, instead of 'improved performance', use 'improved API response time by 30%'.",
-            ],
-            "prompt": prompt,
-            "error": None,
-        }
-    except Exception as e:
-        return {"error": f"An unexpected error occurred: {str(e)}"}
-
-
 # --- Routes ---
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """Serves the initial page."""
     return templates.TemplateResponse(
-        "analysis/index.html",
-        {"request": request, "analysis_result": None, "analysis_request": {}},
+        request=request,
+        name="analysis/index.html",
+        context={"analysis_result": None, "analysis_request": {}},
     )
 
 
@@ -87,14 +57,11 @@ async def analyze_resume(
             api_key=api_key, job_description=job_description, resume_text=resume_text
         )
 
-        print("-- ANALYSIS RESULT --")
-        print(analysis_result)
-
         # 3. Re-render the same template, now with the analysis_result populated
         return templates.TemplateResponse(
-            "analysis/index.html",
-            {
-                "request": request,
+            request=request,
+            name="analysis/index.html",
+            context={
                 "analysis_result": analysis_result,
                 # Pass the original form data back to pre-fill the form
                 "analysis_request": {
@@ -123,9 +90,9 @@ async def analyze_resume(
         # Handle file parsing errors
         print(f"Caught HTTPException: {e.detail}")
         return templates.TemplateResponse(
-            "analysis/index.html",
-            {
-                "request": request,
+            request=request,
+            name="analysis/index.html",
+            context={
                 "analysis_request": {
                     "job_description": job_description,
                     "api_key": api_key,
@@ -139,9 +106,9 @@ async def analyze_resume(
         # Handle other potential errors (e.g., from the graph or other API issues)
         print(f"Caught generic exception: {e}")
         return templates.TemplateResponse(
-            "analysis/index.html",
-            {
-                "request": request,
+            request=request,
+            name="analysis/index.html",
+            context={
                 "analysis_request": {
                     "job_description": job_description,
                     "api_key": api_key,
