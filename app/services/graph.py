@@ -1,17 +1,18 @@
 # graph.py
 
 import os
-from typing import Dict, Any, List
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-from pydantic import BaseModel, Field
-from langchain_core.documents import Document
+from typing import Any, Dict, List
+
 from langchain.tools.retriever import create_retriever_tool
 from langchain_community.vectorstores import InMemoryVectorStore
+from langchain_core.documents import Document
+from langchain_core.messages import ToolMessage, AIMessage
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
-
-from langgraph.graph import StateGraph, END
+from langgraph.graph import END, StateGraph
 from langgraph.graph.message import MessagesState
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.prebuilt import ToolNode
+from pydantic import BaseModel, Field
 
 
 # --- 1. Define the final output schema ---
@@ -75,11 +76,13 @@ def analyzer_node(state: AgenticRagState, llm_with_tool):
     print("--- Analyzer Node ---")
 
     # The retrieved context is in the tool messages. We combine all of it.
-    # tool_messages = [m for m in state["messages"] if m.type == "tool"]
-    # retrieved_context = "\n\n".join([m.content for m in tool_messages])
-    retrieved_context = state["messages"][-1].content
+    tool_messages = [m for m in state["messages"] if isinstance(m, ToolMessage)]
+    retrieved_context = "\n\n---\n\n".join([m.content for m in tool_messages])
 
-    # Enhanced prompt for the analyzer node
+    if not retrieved_context:
+        # Handle cases where the agent decides not to call the tool at all
+        retrieved_context = "No specific context was retrieved from the resume. The analysis will be based on the initial prompt and job description only."
+
     prompt_text = f"""
     You are an expert Career Coach and ATS Analyst. Your goal is to provide a comprehensive, critical, and constructive analysis of a candidate's resume against a specific job description.
 
@@ -111,6 +114,24 @@ def analyzer_node(state: AgenticRagState, llm_with_tool):
     return {"analysis_result": analysis.dict()}
 
 
+def router(state: AgenticRagState) -> str:
+    """
+    This function determines the next step for the agent.
+
+    If the last message from the agent contains tool calls, it routes to the 'retriever'.
+    Otherwise, it means the agent has finished its research and is ready to perform
+    the final analysis, so it routes to the 'analyzer'.
+    """
+    print("--- Router ---")
+    last_message = state["messages"][-1]
+    if last_message.tool_calls:
+        print("Decision: Call retriever")
+        return "retriever"
+    else:
+        print("Decision: Proceed to analyzer")
+        return "analyzer"
+
+
 # --- 4. Build the Graph ---
 
 
@@ -140,10 +161,13 @@ def build_analysis_graph(retriever_tool, api_key: str):
 
     workflow.add_conditional_edges(
         "agent",
-        tools_condition,
-        {"tools": "retriever", END: END},
+        router,
+        {
+            "retriever": "retriever",
+            "analyzer": "analyzer",
+        },
     )
-    workflow.add_edge("retriever", "analyzer")
+    workflow.add_edge("retriever", "agent")
     workflow.add_edge("analyzer", END)
 
     return workflow.compile()
@@ -177,9 +201,7 @@ def run_analysis_graph(
     vectorstore = InMemoryVectorStore.from_documents(
         documents=doc_splits, embedding=embeddings
     )
-    retriever = vectorstore.as_retriever(
-        search_kwargs={"k": 4}
-    )  # Retrieve top 4 relevant chunks
+    retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
     # Create the tool that the agent will use
     retriever_tool = create_retriever_tool(
@@ -187,16 +209,20 @@ def run_analysis_graph(
         "search_resume",
         "Searches the candidate's resume to find specific evidence, such as skills, experiences, projects, and qualifications, that directly match the requirements outlined in the job description. Use this tool to gather concrete examples and keywords from the resume.",
     )
-    # --- End of Vector Store Creation ---
 
     graph = build_analysis_graph(retriever_tool, api_key)
 
-    user_message = (
-        "You are an expert resume analyst. Your task is to perform a comprehensive analysis of a candidate's resume against the provided job description. "
-        "Your first step is to thoroughly examine the job description to identify the key requirements, including mandatory skills (technical and soft), years of experience, key responsibilities, and educational background. "
-        "Next, use the `search_resume` tool to methodically search the resume for evidence matching each of these key requirements. You can call the tool multiple times if needed to gather information on different aspects (e.g., search for skills, then for experience). "
-        "Once you have gathered all the relevant context from the resume, you will stop calling tools and provide a final summary of your findings to be used for the detailed analysis."
-    )
+    user_message = f"""You are an expert resume analyst. Your task is to perform a comprehensive analysis of a candidate's resume against the provided job description.
+
+    Here is the Job Description you must analyze:
+    ---
+    {job_description}
+    ---
+
+    Your first step is to thoroughly examine the job description above to identify the key requirements, including mandatory skills (technical and soft), years of experience, key responsibilities, and educational background.
+    Next, use the `search_resume` tool to methodically search the resume for evidence matching each of these key requirements. You MUST call the tool multiple times to gather sufficient information on different aspects (e.g., first search for 'Python' and 'Django' skills, then separately search for 'project management experience').
+    Once you have gathered all the relevant context from the resume by making multiple tool calls, and you are confident you have enough information, you will stop calling tools and instead respond with a short sentence like 'I have gathered sufficient information to proceed with the analysis.' This final message will trigger the next step.
+    """
 
     inputs = {"messages": [("user", user_message)], "job_description": job_description}
 
