@@ -1,18 +1,19 @@
 # graph.py
-
 import os
 from typing import Any, Dict, List
 
 from langchain.tools.retriever import create_retriever_tool
 from langchain_community.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
-from langchain_core.messages import ToolMessage, AIMessage
+from langchain_core.messages import ToolMessage
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import MessagesState
 from langgraph.prebuilt import ToolNode
 from pydantic import BaseModel, Field
+
+from app.services.utils import format_prompt_string
 
 
 # --- 1. Define the final output schema ---
@@ -84,31 +85,69 @@ def analyzer_node(state: AgenticRagState, llm_with_tool):
         retrieved_context = "No specific context was retrieved from the resume. The analysis will be based on the initial prompt and job description only."
 
     prompt_text = f"""
-    You are an expert Career Coach and ATS Analyst. Your goal is to provide a comprehensive, critical, and constructive analysis of a candidate's resume against a specific job description.
+## Persona
+You are a highly analytical and evidence-based Career Coach and ATS Analyst. Your analysis must be objective, critical, and directly tied to the context provided.
 
-    Base your entire analysis *only* on the provided Job Description and Retrieved Resume Context. Do not invent information.
+## Core Task
+Analyze the Retrieved Resume Context against the Job Description and generate a single, clean JSON object with no extraneous text or explanations outside of the JSON structure. Base your entire analysis *strictly* on the provided context. Do not invent skills, experiences, or formatting details.
 
-    **Job Description:**
-    ---
-    {state["job_description"]}
-    ---
+## Important Context Limitation
+The 'Retrieved Resume Context' consists of text snippets that matched specific search queries. It is **NOT** the full, formatted resume document. Therefore, your analysis of ATS friendliness and structure must be based only on the parseable text and keywords present, not on visual layout, fonts, or columns, which you cannot see.
 
-    **Retrieved Resume Context:**
-    ---
-    {retrieved_context}
-    ---
+## Input Data
 
-    Now, perform the analysis and structure your response according to the following detailed instructions for each field:
+**Job Description:**
+---
+{state["job_description"]}
+---
 
-    - **match_score**: Calculate a holistic match score from 0 to 100. Consider the presence of compatible keywords, alignment of experience with job responsibilities, and overall qualification match. A perfect match on paper is 95-100. A strong match is 80-94. A moderate match is 60-79. A weak match is below 60. Justify the score implicitly in the summary.
-    - **summary**: Write a concise, professional summary (2-4 sentences) of the candidate's fit for the role. Start by stating the level of match (e.g., "The candidate appears to be a strong/moderate/weak fit..."). Highlight the most relevant strengths and point out the most significant gaps.
-    - **ats_friendliness_score**: From the retrieved context, assess how well the resume is structured for an Applicant Tracking System (ATS). Give a score from 0-100.
-    - **ats_friendliness_feedback**: Based on the context, provide feedback. Look for: standard section headers (like 'Experience', 'Education', 'Skills'), simple formatting, and keyword alignment. Mention potential issues like a lack of keywords or complex formatting if discernible. If the context seems clean and keyword-rich, mention that. For example: "The resume seems to use standard sections and relevant keywords. To improve, ensure no tables or images are used in the original document."
-    - **structure_feedback**: Evaluate the resume's structure and readability for a human recruiter. Comment on clarity, conciseness, and organization. Is the information easy to find? Does it tell a compelling story? Example: "The resume context suggests clear sections, but the experience descriptions could be more impactful if they started with action verbs and included quantifiable achievements."
-    - **compatible_keywords**: Extract a list of important skills, technologies, and qualifications mentioned in the job description that are explicitly found in the retrieved resume context.
-    - **missing_keywords**: Identify crucial skills, technologies, and qualifications from the job description that are NOT found in the retrieved resume context. These represent potential gaps.
-    - **suggestions**: Provide a list of concrete, actionable suggestions for improvement. Each suggestion should be a clear, single sentence. Focus on incorporating missing keywords, quantifying achievements, and tailoring the resume summary to the job. Frame them constructively, e.g., "Consider adding a 'Project' section to showcase your experience with 'Docker' and 'Kubernetes'." or "Quantify your achievement in 'process optimization' by stating the percentage improvement you achieved."
-    """
+**Retrieved Resume Context:**
+---
+{retrieved_context}
+---
+
+## JSON Output Schema and Instructions
+
+Your response MUST be a single JSON object matching this schema:
+
+```json
+{{
+  "match_score": "integer",
+  "summary": "string",
+  "ats_friendliness_score": "integer",
+  "ats_friendliness_feedback": "string",
+  "structure_feedback": "string",
+  "compatible_keywords": "list[string]",
+  "missing_keywords": "list[string]",
+  "suggestions": "list[string]"
+}}
+```
+
+Field-by-Field Instructions:
+match_score: (Integer) Calculate a holistic match score from 0 to 100 based on the evidence. The score should directly reflect the balance of compatible vs. missing keywords and experience.
+
+95-100: Perfect match on paper.
+
+80-94: Strong match.
+
+60-79: Moderate match.
+
+<60: Weak match.
+
+summary: (String) A concise, professional summary (2-4 sentences) of the candidate's fit. Begin by stating the match level (e.g., 'This candidate is a strong fit...'). Directly reference the key strengths and most significant gaps identified in your keyword analysis.
+
+ats_friendliness_score: (Integer) Score from 0-100. Base this score only on keyword alignment and the apparent presence of standard, parseable sections within the provided text snippets.
+
+ats_friendliness_feedback: (String) Provide feedback on keyword relevance and text structure, acknowledging the limitation that you cannot see the full document. Example: 'Based on the text provided, the resume contains many relevant keywords. To ensure ATS compatibility, the original document should use standard section headings (like 'Experience') and avoid tables or images.'
+
+structure_feedback: (String) Evaluate the clarity and impact of the language for a human recruiter, based only on the retrieved text. Comment on the use of action verbs and quantifiable results. Example: 'The experience descriptions are clear, but would be more powerful if achievements were quantified (e.g., 'managed a team' vs. 'managed a team of 5 engineers').'
+
+compatible_keywords: (List of Strings) Extract a list of skills, technologies, and qualifications from the job description that are explicitly present in the Retrieved Resume Context.
+
+missing_keywords: (List of Strings) Identify crucial skills, technologies, and qualifications from the job description that are NOT found in the Retrieved Resume Context.
+
+suggestions: (List of Strings) Provide a list of concrete, actionable suggestions for improvement, with each suggestion as a separate string. These suggestions must directly address the findings in missing_keywords and structure_feedback. Example: 'Incorporate the terms 'SaaS' and 'CI/CD' to better align with the job description.' or 'Revise the bullet point on 'process optimization' to include the specific percentage of improvement achieved.'
+"""
 
     analysis = llm_with_tool.invoke(prompt_text)
     return {"analysis_result": analysis.dict()}
@@ -212,17 +251,39 @@ def run_analysis_graph(
 
     graph = build_analysis_graph(retriever_tool, api_key)
 
-    user_message = f"""You are an expert resume analyst. Your task is to perform a comprehensive analysis of a candidate's resume against the provided job description.
+    user_message = f"""
+## Persona
+You are a methodical AI assistant acting as a Resume Data Analyst.
 
-    Here is the Job Description you must analyze:
-    ---
-    {job_description}
-    ---
+## Primary Goal
+Your sole objective in this step is to systematically gather all relevant facts from a candidate's resume that correspond to the requirements in a provided job description. You will use a search tool for this task.
 
-    Your first step is to thoroughly examine the job description above to identify the key requirements, including mandatory skills (technical and soft), years of experience, key responsibilities, and educational background.
-    Next, use the `search_resume` tool to methodically search the resume for evidence matching each of these key requirements. You MUST call the tool multiple times to gather sufficient information on different aspects (e.g., first search for 'Python' and 'Django' skills, then separately search for 'project management experience').
-    Once you have gathered all the relevant context from the resume by making multiple tool calls, and you are confident you have enough information, you will stop calling tools and instead respond with a short sentence like 'I have gathered sufficient information to proceed with the analysis.' This final message will trigger the next step.
-    """
+## Context
+- **Job Description:** The source of truth for all requirements.
+- **Available Tool:** You have access to a single tool: `search_resume(query: str)`.
+
+## Workflow & Strict Instructions
+
+1.  **Internal Analysis First:** Before using any tools, perform a silent, internal analysis of the job description below. Create a mental checklist of all key requirements, such as:
+    * Technical Skills (e.g., specific languages, software, frameworks)
+    * Years and Types of Experience (e.g., "5+ years", "management experience")
+    * Educational Background (e.g., degrees, certifications)
+    * Key Responsibilities (e.g., "client-facing", "budget management")
+
+2.  **Execute Search Plan:** Based on your internal checklist, methodically use the `search_resume` tool to find evidence for each requirement.
+    * **Be Systematic:** Query for each distinct requirement or group of related requirements.
+    * **Be Efficient:** Combine searches for related skills into a single tool call where logical (e.g., `search_resume(query="Python, Django, Flask")`).
+    * **Be Thorough:** Do not stop until you have attempted to find evidence for **all** the key requirements you identified in your initial analysis.
+
+3.  **Completion and Final Output:**
+    * Once your systematic search is complete, you MUST stop calling tools.
+    * Your final and ONLY response for this task must be the exact sentence: **"I have gathered sufficient information to proceed with the analysis."** Do not add any other text or explanation.
+
+## Job Description to Analyze
+---
+{job_description}
+---
+"""
 
     inputs = {"messages": [("user", user_message)], "job_description": job_description}
 
@@ -232,4 +293,9 @@ def run_analysis_graph(
     if not final_state.get("analysis_result"):
         raise Exception("Graph did not produce a final analysis.")
 
-    return final_state["analysis_result"]
+    result = final_state["analysis_result"]
+    result["prompt"] = format_prompt_string(
+        analysis_result=result, job_description=job_description
+    )
+
+    return result
