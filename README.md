@@ -214,9 +214,3 @@ This template demonstrates a powerful and modern frontend built with HTMX and Al
 
 - Marcelo Lourenco - [LinkedIn](https://www.linkedin.com/in/marcelo-lourenco/)
 - Email: [mlourencosantos\_@hotmail.com](mailto:mlourencosantos_@hotmail.com)
-
-### Project Link
-
-- [GitHub Repository](https://github.com/m-lourenco0/resume-analysis-tool)
-
-```
