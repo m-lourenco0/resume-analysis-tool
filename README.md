@@ -212,5 +212,5 @@ This template demonstrates a powerful and modern frontend built with HTMX and Al
 
 ## 📬 Connect with Me
 
-- Marcelo Lourenco - [LinkedIn](https://www.linkedin.com/in/marcelo-lourenco/)
+- Marcelo Lourenco - [LinkedIn](https://www.linkedin.com/in/marcelo-lourenco-dos-santos/)
 - Email: [mlourencosantos\_@hotmail.com](mailto:mlourencosantos_@hotmail.com)
