@@ -8,6 +8,10 @@ This project is a powerful resume optimization tool designed to help job seekers
 
 The backend is built with the high-performance FastAPI framework, while the frontend is a modern, dynamic single-page application experience created with HTMX, Alpine.js, and Tailwind CSS. This combination allows for a responsive and interactive user interface without the need for a complex JavaScript framework.
 
+## 🚀 Live Demo
+
+You can access a Live Demo of this project and try it out clicking here: [Live Demo](https://resume-analysis-tool-qq8m.onrender.com/)
+
 ## ✨ Key Features
 
 - 🤖 **AI-Powered Analysis**: Utilizes LLMs to understand the context and nuances of both the job description and your resume.
@@ -89,8 +93,8 @@ To get a local copy up and running, follow these simple steps.
 1. Clone the repo:
 
    ```bash
-   git clone https://github.com/your_username/your_project.git
-   cd your_project
+   git clone https://github.com/m-lourenco0/resume-analysis-tool.git
+   cd resume-analysis-tool
    ```
 
 2. Create and activate a virtual environment using `uv`:
